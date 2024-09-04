@@ -85,9 +85,9 @@ def main():
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
     send_example_telemetry("run_parler_tts", model_args, data_args)
 
-    if training_args.wandb_api_key:
+    if data_args.wandb_api_key:
         import wandb
-        wandb.login(key=training_args.wandb_api_key)
+        wandb.login(key=data_args.wandb_api_key)
 
     if training_args.dtype == "float16":
         mixed_precision = "fp16"

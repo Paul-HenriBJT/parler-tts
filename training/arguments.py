@@ -105,7 +105,12 @@ class DataTrainingArguments:
     into argparse arguments to be able to specify them on
     the command line.
     """
-
+    wandb_api_key: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "Weights & Biases API key. If provided, it will be used to log in to wandb."
+        },
+    )
     train_dataset_name: str = field(
         default=None,
         metadata={
@@ -298,10 +303,6 @@ class DataTrainingArguments:
         metadata={
             "help": "If specified, the name of the run. If not specified, wandb will give a random name to this run."
         },
-    )
-    wandb_api_key: Optional[str] = field(
-        default=None,
-        metadata={"help": "Weights & Biases API key. If provided, it will be used to log in to wandb."}
     )
     save_to_disk: str = field(
         default=None,
