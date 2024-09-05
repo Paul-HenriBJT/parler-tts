@@ -50,9 +50,5 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
-    install_requires=_deps,
-    extras_require={
-        "dev": _extras_dev_deps,
-        "train": _extras_training_deps,
-    },
+    install_requires=_deps
 )
