@@ -22,15 +22,6 @@ _deps = [
     "torch",
     "sentencepiece",
     "descript-audio-codec",
-]
-
-_extras_dev_deps = [
-    "black~=23.1",
-    "isort>=5.5.4",
-    "ruff>=0.0.241,<=0.0.259",
-]
-
-_extras_training_deps = [
     "jiwer",
     "wandb",
     "accelerate",
