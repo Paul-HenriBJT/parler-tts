@@ -126,6 +126,7 @@ class DataTrainingArguments:
             "multiple datasets by separating dataset configs by a '+' symbol."
         },
     )
+    id_column_name: str = field(default=None, metadata={"help": "id column name."})
     train_split_name: str = field(
         default="train",
         metadata={
