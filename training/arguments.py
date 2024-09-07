@@ -105,12 +105,6 @@ class DataTrainingArguments:
     into argparse arguments to be able to specify them on
     the command line.
     """
-    wandb_api_key: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "Weights & Biases API key. If provided, it will be used to log in to wandb."
-        },
-    )
     train_dataset_name: str = field(
         default=None,
         metadata={
@@ -306,21 +300,6 @@ class DataTrainingArguments:
                 "should only be set to `True` for repositories you trust and in which you have read the code, as it will "
                 "execute code present on the Hub on your local machine."
             )
-        },
-    )
-    add_audio_samples_to_wandb: bool = field(
-        default=False,
-        metadata={"help": "If set and if `wandb` in args.report_to, will add generated audio samples to wandb logs."},
-    )
-    id_column_name: str = field(default=None, metadata={"help": "id column name."})
-    wandb_project: str = field(
-        default="parler-speech",
-        metadata={"help": "The name of the wandb project."},
-    )
-    wandb_run_name: str = field(
-        default=None,
-        metadata={
-            "help": "If specified, the name of the run. If not specified, wandb will give a random name to this run."
         },
     )
     save_to_disk: str = field(

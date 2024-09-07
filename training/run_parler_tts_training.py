@@ -85,10 +85,6 @@ def main():
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
     send_example_telemetry("run_parler_tts", model_args, data_args)
 
-    if data_args.wandb_api_key:
-        import wandb
-        wandb.login(key=data_args.wandb_api_key)
-
     if training_args.dtype == "float16":
         mixed_precision = "fp16"
         torch_dtype = torch.float16
@@ -119,28 +115,6 @@ def main():
         log_with=training_args.report_to,
         project_dir=training_args.output_dir,
         kwargs_handlers=kwargs_handlers,
-    )
-
-    accelerator.init_trackers(
-        project_name=data_args.wandb_project,
-        config={
-            "learning_rate": training_args.learning_rate,
-            "model_name_or_path": model_args.model_name_or_path,
-            "num_train_epochs": training_args.num_train_epochs,
-            "gradient_accumulation_steps": training_args.gradient_accumulation_steps,
-            "per_device_train_batch_size": training_args.per_device_train_batch_size,
-            "global_batch_size": training_args.per_device_train_batch_size * accelerator.num_processes,
-            "mixed_precision": mixed_precision,
-            "lr_scheduler_type": training_args.lr_scheduler_type,
-            "warmup_steps": training_args.warmup_steps,
-            "freeze_text_encoder": model_args.freeze_text_encoder,
-            "max_duration_in_seconds": data_args.max_duration_in_seconds,
-            "weight_decay": training_args.weight_decay,
-            "adam_beta1": training_args.adam_beta1,
-            "adam_beta2": training_args.adam_beta2,
-            "temperature": model_args.temperature,
-        },
-        init_kwargs={"wandb": {"name": data_args.wandb_run_name}} if data_args.wandb_run_name else {},
     )
 
     # Detecting last checkpoint and eventually continue from last checkpoint
@@ -792,9 +766,6 @@ def main():
                 repo_name = Path(training_args.output_dir).absolute().name
             repo_id = api.create_repo(repo_name, exist_ok=True).repo_id
 
-            with open(os.path.join(training_args.output_dir, ".gitignore"), "w+") as gitignore:
-                if "wandb" not in gitignore:
-                    gitignore.write("wandb\n")
         elif training_args.output_dir is not None:
             os.makedirs(training_args.output_dir, exist_ok=True)
     accelerator.wait_for_everyone()
@@ -1135,18 +1106,6 @@ def main():
                             )
                             eval_metrics.update(metric_values)
                             metrics_desc = " ".join([f"Eval {key}: {value} |" for key, value in metric_values.items()])
-                            if "wandb" in training_args.report_to:
-                                log_pred(
-                                    accelerator,
-                                    pred_descriptions,
-                                    pred_prompts,
-                                    transcriptions,
-                                    audios,
-                                    si_sdr_measures,
-                                    sampling_rate=sampling_rate,
-                                    step=cur_step,
-                                    prefix="eval",
-                                )
                         accelerator.wait_for_everyone()
 
                     # Print metrics and update progress bar
