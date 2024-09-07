@@ -371,7 +371,7 @@ def main():
     print("gathered_tensor", gathered_tensor)
     accelerator.wait_for_everyone()
 
-    if not dataset_was_precomputed:
+    if not data_args.training_only:
         # Filter on text length
         if description_column_name is not None and data_args.max_text_length is not None:
             with accelerator.local_main_process_first():
