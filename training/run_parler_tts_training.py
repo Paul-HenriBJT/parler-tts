@@ -55,7 +55,6 @@ from parler_tts import (
 from training.utils import (
     get_last_checkpoint,
     rotate_checkpoints,
-    log_pred,
     log_metric,
     load_all_codec_checkpoints,
     save_codec_checkpoint,
@@ -569,7 +568,7 @@ def main():
         accelerator.wait_for_everyone()
         logger.info(f"Dataset saved at {data_args.save_to_disk}")
 
-    if data_args.preprocessed_dataset_hub_path and accelerator.is_main_process:
+    if data_args.preprocessed_dataset_hub_path and accelerator.is_main_process and not data_args.training_only:
         logger.info(f"Pushing processed dataset to Hub: {data_args.preprocessed_dataset_hub_path}")
         vectorized_datasets.push_to_hub(data_args.preprocessed_dataset_hub_path)
 
