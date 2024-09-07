@@ -31,7 +31,7 @@ import torch
 from torch.utils.data import DataLoader
 
 import datasets
-from datasets import DatasetDict, Dataset, IterableDataset, concatenate_datasets
+from datasets import DatasetDict, Dataset, IterableDataset, concatenate_datasets, load_dataset
 
 from huggingface_hub import HfApi
 
@@ -231,10 +231,9 @@ def main():
         os.makedirs(data_args.save_to_disk, exist_ok=True)
 
     # assume that the dataset has been saved to `save_to_disk` if the latter is not empty
-    dataset_was_precomputed = len(os.listdir(data_args.save_to_disk)) > 0
-    if dataset_was_precomputed:
-        with accelerator.local_main_process_first():
-            vectorized_datasets = datasets.load_from_disk(data_args.save_to_disk)
+    if data_args.training_only and data_args.preprocessed_dataset_hub_path:
+        logger.info(f"Loading preprocessed dataset from Hub: {data_args.preprocessed_dataset_hub_path}")
+        vectorized_datasets = load_dataset(data_args.preprocessed_dataset_hub_path)
     else:
         raw_datasets = DatasetDict()
 
@@ -587,7 +586,7 @@ def main():
                     input_columns=["prompt_input_ids"],
                 )
 
-    if data_args.save_to_disk is not None and not dataset_was_precomputed:
+    if data_args.save_to_disk is not None and not data_args.training_only:
         if accelerator.is_main_process:
             vectorized_datasets.save_to_disk(
                 data_args.save_to_disk,
@@ -595,6 +594,10 @@ def main():
             )
         accelerator.wait_for_everyone()
         logger.info(f"Dataset saved at {data_args.save_to_disk}")
+
+    if data_args.preprocessed_dataset_hub_path and accelerator.is_main_process:
+        logger.info(f"Pushing processed dataset to Hub: {data_args.preprocessed_dataset_hub_path}")
+        vectorized_datasets.push_to_hub(data_args.preprocessed_dataset_hub_path)
 
     audio_max_length = None
     if padding == "max_length":
