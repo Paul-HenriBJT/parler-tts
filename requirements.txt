@@ -1,1 +1,1 @@
-git+https://github.com/Paul-HenriBJT/parler-tts.git@flexai
+git+https://github.com/Paul-HenriBJT/parler-tts.git@runpod
