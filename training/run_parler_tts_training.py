@@ -53,6 +53,7 @@ from parler_tts import (
 )
 
 from training.utils import (
+    log_pred,
     get_last_checkpoint,
     rotate_checkpoints,
     log_metric,
