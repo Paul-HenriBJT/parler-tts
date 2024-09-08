@@ -589,7 +589,7 @@ def main():
         if accelerator.is_main_process:
             vectorized_datasets.save_to_disk(
                 data_args.save_to_disk,
-                num_proc=min(data_args.preprocessing_num_workers, len(vectorized_datasets["eval"]) - 1),
+                num_proc=min(data_args.preprocessing_num_workers, len(get_evaluation_split(vectorized_datasets)) - 1),
             )
         accelerator.wait_for_everyone()
         logger.info(f"Dataset saved at {data_args.save_to_disk}")
@@ -1057,7 +1057,7 @@ def main():
                     batch = release_memory(batch)
 
                     validation_dataloader = DataLoader(
-                        vectorized_datasets["eval"],
+                        get_evaluation_split(vectorized_datasets),
                         collate_fn=data_collator,
                         batch_size=per_device_eval_batch_size,
                         drop_last=False,
@@ -1080,7 +1080,7 @@ def main():
 
                     if training_args.predict_with_generate:
                         validation_dataloader = DataLoader(
-                            vectorized_datasets["eval"],
+                            get_evaluation_split(vectorized_datasets),
                             collate_fn=data_collator,
                             batch_size=per_device_eval_batch_size,
                             drop_last=False,
@@ -1187,6 +1187,26 @@ def main():
             break
 
     accelerator.end_training()
+
+def get_evaluation_split(datasets):
+    """
+    Retrieve the evaluation split from the datasets dictionary.
+    Prioritizes 'eval', then 'test', and creates a default if neither exists.
+    """
+    if "eval" in datasets:
+        return datasets["eval"]
+    elif "test" in datasets:
+        return datasets["test"]
+    elif "train" in datasets:
+        # If neither eval nor test exists, create a small evaluation set from train
+        train_dataset = datasets["train"]
+        eval_size = min(len(train_dataset) // 10, 1000)  # 10% or 1000 samples, whichever is smaller
+        train_dataset, eval_dataset = train_dataset.train_test_split(test_size=eval_size, shuffle=True, seed=42).values()
+        datasets["train"] = train_dataset
+        datasets["eval"] = eval_dataset
+        return eval_dataset
+    else:
+        raise ValueError("No 'eval', 'test', or 'train' split found in the dataset.")
 
 
 if __name__ == "__main__":
