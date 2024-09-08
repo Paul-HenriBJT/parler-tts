@@ -46,7 +46,7 @@
   "include_inputs_for_metrics": true,
   "group_by_length": true,
   "training_only": true,
-  "preprocessed_dataset_hub_path": "PHBJT/mls_french_tokenized_reduced_500",
+  "preprocessed_dataset_hub_path": "PHBJT/mls_french_tokenized_reduced_400",
   "id_column_name": "id",
   "wandb_api_key" : "c7f8305aef0a0eb4857def659a094467e7290144"
 }
