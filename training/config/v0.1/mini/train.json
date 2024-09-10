@@ -4,12 +4,12 @@
 "prompt_tokenizer_name": "parler-tts/parler-tts-mini-v1" ,
 "report_to": "wandb" ,
 "overwrite_output_dir": true ,
-"train_dataset_name": "PHBJT/cml-tts-1percent-subset" ,
-"train_metadata_dataset_name": "PHBJT/cml-tts-1percent-subset-description" ,
+"train_dataset_name": "PHBJT/cml-tts-5percent-subset" ,
+"train_metadata_dataset_name": "PHBJT/cml-tts-5percent-subset-description" ,
 "train_dataset_config_name": "default" ,
 "train_split_name": "train" ,
-"eval_dataset_name":"PHBJT/cml-tts-1percent-subset" ,
-"eval_metadata_dataset_name": "PHBJT/cml-tts-1percent-subset-description" ,
+"eval_dataset_name":"PHBJT/cml-tts-5percent-subset" ,
+"eval_metadata_dataset_name": "PHBJT/cml-tts-5percent-subset-description" ,
 "eval_dataset_config_name": "default" ,
 "eval_split_name": "train" ,
 "max_eval_samples": 8 ,
@@ -48,5 +48,6 @@
 "group_by_length": true,
 "wandb_api_key": "c7f8305aef0a0eb4857def659a094467e7290144",
 "wandb_project": "parler-tts-mini-v0.1",
-"wandb_run_name": "cml-1%-subset"
+"wandb_run_name": "cml-5%-subset",
+"add_audio_samples_to_wandb" : true
 }
