@@ -3,7 +3,7 @@
 "description_tokenizer_name": "parler-tts/parler-tts-mini-v1" ,
 "prompt_tokenizer_name": "parler-tts/parler-tts-mini-v1" ,
 "report_to": "wandb" ,
-"overwrite_output_dir": true ,
+"overwrite_output_dir": false ,
 "train_dataset_name": "PHBJT/cml-tts-5percent-subset" ,
 "train_metadata_dataset_name": "PHBJT/cml-tts-5percent-subset-description" ,
 "train_dataset_config_name": "default" ,
@@ -23,7 +23,7 @@
 "preprocessing_num_workers": 2 ,
 "do_train": true ,
 "num_train_epochs": 50 ,
-"max_steps": 10000,
+"max_steps": 5000,
 "gradient_accumulation_steps": 18 ,
 "gradient_checkpointing": true,
 "per_device_train_batch_size": 2 ,
@@ -49,7 +49,5 @@
 "wandb_api_key": "c7f8305aef0a0eb4857def659a094467e7290144",
 "wandb_project": "parler-tts-mini-v0.1",
 "wandb_run_name": "cml-5%-subset",
-"add_audio_samples_to_wandb" : true,
-"training_only": true,
-"preprocessed_dataset_hub_path": "PHBJT/cml-tts-5percent-subset-tokenized"
+"add_audio_samples_to_wandb" : true
 }
