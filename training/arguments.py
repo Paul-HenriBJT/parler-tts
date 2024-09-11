@@ -93,7 +93,15 @@ class ModelArguments:
         metadata={
             "help": "Prompt tokenizer padding side. Defaults to `left`. If the prompt is pre-pended to the codebooks hidden states, it should be padded on the left."
         },
+    ),
+    checkpoint_source_dir: Optional[str] = field(
+        default=None,
+        metadata={"help": "Path to the checkpoint directory."
+                  "If specified, will start the training from the checkpoint."
+                  "Checkpoints are not save in the this directory."
+                  "They are saved in the `output_dir`."},
     )
+
 
 
 @dataclass
