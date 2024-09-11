@@ -272,25 +272,6 @@ class DataTrainingArguments:
             )
         },
     )
-    training_only: bool = field(
-        default=False,
-        metadata={
-            "help": (
-                "Whether to only do training and skip data preprocessing. This is especially useful when you have already"
-                "preprocessed the data and saved it to the hub."
-                "You need to set the preprocessed_dataset_hub_path to the path of the preprocessed dataset."
-            )
-        },
-    )
-    preprocessed_dataset_hub_path: str = field(
-        default=None,
-        metadata={
-            "help": (
-                "If set, will upload the preprocessed dataset to the Hub at this path if a preprocessing is done."
-                "If training_only is set, will load the preprocessed dataset from this path."
-            )
-        }
-    )
     token: str = field(
         default=None,
         metadata={
