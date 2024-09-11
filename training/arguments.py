@@ -327,6 +327,19 @@ class DataTrainingArguments:
         default=2,
         metadata={"help": ("Pad to multiple of for tokenizers.")},
     )
+    gcs_bucket: Optional[str] = field(
+        default=None,
+        metadata={"help": "Google Cloud Storage bucket to fetch and write checkpoints files."},
+    )
+    gcs_checkpoint_path: Optional[str] = field(
+        default=None,
+        metadata={"help": "Path to the checkpoint in the GCS bucket."
+                  "If specified will fetch the checkpoint from the GCS bucket and load it."},
+    )
+    gcp_token: Optional[str] = field(
+        default=None,
+        metadata={"help": "Path to the GCP service account JSON key file for authentication."}
+    )
 
 
 @dataclass

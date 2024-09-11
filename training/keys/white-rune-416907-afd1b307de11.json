@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "white-rune-416907",
+  "private_key_id": "afd1b307de11a5d37e8eb10b41d1bff4a032635c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCsSPrfRqdAhhgb\n9+Nm+8DzFgby0DlPowaPM7la79ai2S9346s90I5QKj0EagrTboh1eQE9BYRniPd0\nAxqGWhIDl/UXtk41ny1BdON5Q6EpKGBDEUQMmkzcT0D/LZRVXWAYFvkZ2Fe0WwHW\nmMgoOH0CZdanX9+V0r3tiHo9qArSBj9yQpfo2CaO4i2IWv3T3qIhXne9zrqsQnuw\n4CcyvhafZ6RTCX0yUKEW5KmKmYNK64gd0XqlkxqoKAZHoEWsDCv5htaDdT+xAiaX\nPnjjHnPt2240J/yPjKazMvMryHjnJ91jiOUfut2+03TZfcQoQMOGFTW2ENIJE4ir\nOhJ6V4WXAgMBAAECggEADL9FmJmQrGx/gipAMBF2gEXj87lGVEcaqCPKlhjix5/M\nLFGzDNrOfM3zP81cybIG9LIkTlCHMGXo8TN9le06IfvvTXbWqI8DeTFd104SsYnk\nPXIcl9Ye07olc/v6WqqS/pVMjwX7z0NginE5dghf73p7fFzSnTI/jUCo0sEJM+rV\nP8rkGVAYhEF8RWUTCqlN50jxyP5mNpRkH+J2wWrGNOmqko8r0pdDngI6HnF1eNEM\nyfIy8CX6oc+8ltYkpvGCCW1p/ExHt3IkjpYf4l2Op3WIkUuirFkHDa0FH3eMP7RX\n/6LxWTkivT+GbzYxY2ClFcgBuVSE8vIfjb7BXLtA0QKBgQDjcMk/H+82We3jE+M/\nnd4y3MTo8SV1UjTAJjGOai0yiOqvw93vMFZA8YVLKdA1OwvG+UajFURJAC4+khXV\nF7m9axf3dM3cfVpf97GOUZ+B79PS4TGnsOAFltT9tV/beJ6W71jQYZOf7eSitkNB\n0+/80Vzn/mFFZUeI5XmbjavwWQKBgQDB6y/35XYemDUlt2SOPBuKiBQ/ju9RcVtb\nH+aT7sLatPvLa6ct1DNh7TUgXLDQFH4NiVPWHrLgPQwvJ+hVztzOl8D/YfMKhYwB\ngNdHWuIXlL9vdgHKIIZVDLxrKxaj6YQQcjzOJd5jHxuAbQCCWh8E+xcK97Zl3Tu9\nDBxEsPrnbwKBgEM40KJRo/gieEcHV8Ezvbq2uZRHwdR9KY4pO7hl9VncUdEFSREq\n7jNfrw/aGenBu+dhQdltrbMN1J01vDIxQvqTLpA6+6VRf2ah5N61jTlwUuEfIff4\nNR4xyF38P4q0idr+fveH/4PjYhIdYJ+SLnpAvv7qloFWP+BcQqcRJmJxAoGBALdg\nRi4wCTEJUkjmUerHIGwyHqOz8M+dWHylgBAoWo8jUnCczqzh2+0guXpu7Kz4k/MN\nCACVayXt1NXK8UQjqF6c1t8pqwEqJKlPQ0Swxtjxys4GU87mTuGid5MIXhKGwmIj\nBSkUWmZ1hjY93ZtmyaqWHsY6VXuiZ9lv2FOE4N91AoGAGu3oJnPbtAebjqeYZXLU\nSh36MJWvyb3IA4hj3bh24GBXKBDDA8oE8Buf2wKl2RPYEKOXVHky8e6eynrYyoc4\nGna6RlWK/BA6MiHxl30bORvHbSHPJnoykGqsY99vAVSWhwOQdGb9sO9QozOjKtql\n1/3/GCy9zzxu971XM2Lzsv8=\n-----END PRIVATE KEY-----\n",
+  "client_email": "trainings-checkpoint-admin@white-rune-416907.iam.gserviceaccount.com",
+  "client_id": "111037663661325829364",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/trainings-checkpoint-admin%40white-rune-416907.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
