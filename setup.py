@@ -27,6 +27,7 @@ _deps = [
     "accelerate",
     "evaluate",
     "datasets[audio]>=2.14.5",
+    "google.cloud.storage"
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

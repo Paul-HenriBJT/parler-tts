@@ -1,6 +1,6 @@
 from google.oauth2 import service_account
 import os
-from google.cloud import storage, transfer_manager
+from google.cloud.storage import Client, transfer_manager
 
 def get_storage_client(key_file_path):
     """
@@ -14,10 +14,10 @@ def get_storage_client(key_file_path):
     """
     if key_file_path and os.path.exists(key_file_path):
         credentials = service_account.Credentials.from_service_account_file(key_file_path)
-        return storage.Client(credentials=credentials)
+        return Client(credentials=credentials)
     else:
         # Fall back to default credentials if no key file is provided or file doesn't exist
-        return storage.Client()
+        return Client()
 
 def upload_checkpoint_to_gcs(bucket_name, checkpoint_path, local_dir, key_file_path):
     """
@@ -57,7 +57,7 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
     print(f"Fetching checkpoint from {bucket_name}/{checkpoint_path} with token {key_file_path}")
     print(f"Using key file: {key_file_path}")
     
-    storage_client = storage.Client.from_service_account_json(key_file_path)
+    storage_client = Client.from_service_account_json(key_file_path)
     bucket = storage_client.bucket(bucket_name)
     
     # List all blobs with the given prefix
