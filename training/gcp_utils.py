@@ -60,6 +60,7 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
     blobs = bucket.list_blobs(prefix=checkpoint_path)
 
     for blob in blobs:
+        print(f"Downloading: {blob.name}")
         if blob.name.endswith("/"):
             continue
         
