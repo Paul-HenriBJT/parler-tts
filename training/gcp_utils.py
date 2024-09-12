@@ -56,7 +56,7 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
     """
     print(f"Using key file: {key_file_path}")
     storage_client = storage.Client.from_service_account_json(key_file_path)
-    bucket = storage_client.bucket(bucket_name=bucket_name)
+    bucket = storage_client.get_bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=checkpoint_path)
     print(blobs)
     for blob in blobs:
