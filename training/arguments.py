@@ -94,7 +94,14 @@ class ModelArguments:
             "help": "Prompt tokenizer padding side. Defaults to `left`. If the prompt is pre-pended to the codebooks hidden states, it should be padded on the left."
         },
     )
-
+    google_drive_token: str = field(
+        default=None,
+        metadata={"help": "Access token for Google Drive"},
+    )
+    load_checkpoint: str = field(
+        default=None,
+        metadata={"help": "Path to checkpoint to load."},
+    )
 
 @dataclass
 class DataTrainingArguments:
@@ -105,6 +112,12 @@ class DataTrainingArguments:
     into argparse arguments to be able to specify them on
     the command line.
     """
+    wandb_api_key: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "Weights & Biases API key. If provided, it will be used to log in to wandb."
+        },
+    )
     train_dataset_name: str = field(
         default=None,
         metadata={
@@ -259,25 +272,6 @@ class DataTrainingArguments:
             )
         },
     )
-    training_only: bool = field(
-        default=False,
-        metadata={
-            "help": (
-                "Whether to only do training and skip data preprocessing. This is especially useful when you have already"
-                "preprocessed the data and saved it to the hub."
-                "You need to set the preprocessed_dataset_hub_path to the path of the preprocessed dataset."
-            )
-        },
-    )
-    preprocessed_dataset_hub_path: str = field(
-        default=None,
-        metadata={
-            "help": (
-                "If set, will upload the preprocessed dataset to the Hub at this path if a preprocessing is done."
-                "If training_only is set, will load the preprocessed dataset from this path."
-            )
-        }
-    )
     token: str = field(
         default=None,
         metadata={
@@ -303,6 +297,21 @@ class DataTrainingArguments:
             )
         },
     )
+    add_audio_samples_to_wandb: bool = field(
+        default=False,
+        metadata={"help": "If set and if `wandb` in args.report_to, will add generated audio samples to wandb logs."},
+    )
+    id_column_name: str = field(default=None, metadata={"help": "id column name."})
+    wandb_project: str = field(
+        default="parler-speech",
+        metadata={"help": "The name of the wandb project."},
+    )
+    wandb_run_name: str = field(
+        default=None,
+        metadata={
+            "help": "If specified, the name of the run. If not specified, wandb will give a random name to this run."
+        },
+    )
     save_to_disk: str = field(
         default=None,
         metadata={
@@ -318,7 +327,24 @@ class DataTrainingArguments:
         default=2,
         metadata={"help": ("Pad to multiple of for tokenizers.")},
     )
-
+    gcs_bucket: Optional[str] = field(
+        default=None,
+        metadata={"help": "Google Cloud Storage bucket to fetch and write checkpoints files."},
+    )
+    gcs_checkpoint_path: Optional[str] = field(
+        default=None,
+        metadata={"help": "Path to the checkpoint in the GCS bucket."
+                  "If specified will fetch the checkpoint from the GCS bucket and load it."},
+    )
+    gcp_token: Optional[str] = field(
+        default=None,
+        metadata={"help": "Path to the GCP service account JSON key file for authentication."}
+    )
+    precomputed_dataset: Optional[str] = field(
+        default=None,
+        metadata={"help": "The name of the dataset to load from Hugging Face Hub."},
+    )
+    
 
 @dataclass
 class ParlerTTSTrainingArguments(Seq2SeqTrainingArguments):

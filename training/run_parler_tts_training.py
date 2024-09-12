@@ -52,7 +52,10 @@ from parler_tts import (
     build_delay_pattern_mask,
 )
 
+from training.gcp_utils import fetch_checkpoint_from_gcs, upload_checkpoint_to_gcs
+
 from training.utils import (
+    log_pred,
     get_last_checkpoint,
     rotate_checkpoints,
     log_metric,
@@ -84,6 +87,15 @@ def main():
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
     send_example_telemetry("run_parler_tts", model_args, data_args)
 
+    if data_args.gcs_bucket and data_args.gcs_checkpoint_path and data_args.gcp_token:
+        print(f"Fetching checkpoint from {data_args.gcs_checkpoint_path} with token {data_args.gcp_token}")
+        fetch_checkpoint_from_gcs(data_args.gcs_bucket, data_args.gcs_checkpoint_path, training_args.output_dir, data_args.gcp_token)
+
+
+    if data_args.wandb_api_key:
+        import wandb
+        wandb.login(key=data_args.wandb_api_key)
+
     if training_args.dtype == "float16":
         mixed_precision = "fp16"
         torch_dtype = torch.float16
@@ -114,6 +126,28 @@ def main():
         log_with=training_args.report_to,
         project_dir=training_args.output_dir,
         kwargs_handlers=kwargs_handlers,
+    )
+
+    accelerator.init_trackers(
+        project_name=data_args.wandb_project,
+        config={
+            "learning_rate": training_args.learning_rate,
+            "model_name_or_path": model_args.model_name_or_path,
+            "num_train_epochs": training_args.num_train_epochs,
+            "gradient_accumulation_steps": training_args.gradient_accumulation_steps,
+            "per_device_train_batch_size": training_args.per_device_train_batch_size,
+            "global_batch_size": training_args.per_device_train_batch_size * accelerator.num_processes,
+            "mixed_precision": mixed_precision,
+            "lr_scheduler_type": training_args.lr_scheduler_type,
+            "warmup_steps": training_args.warmup_steps,
+            "freeze_text_encoder": model_args.freeze_text_encoder,
+            "max_duration_in_seconds": data_args.max_duration_in_seconds,
+            "weight_decay": training_args.weight_decay,
+            "adam_beta1": training_args.adam_beta1,
+            "adam_beta2": training_args.adam_beta2,
+            "temperature": model_args.temperature,
+        },
+        init_kwargs={"wandb": {"name": data_args.wandb_run_name}} if data_args.wandb_run_name else {},
     )
 
     # Detecting last checkpoint and eventually continue from last checkpoint
@@ -204,10 +238,28 @@ def main():
         os.makedirs(data_args.save_to_disk, exist_ok=True)
 
     # assume that the dataset has been saved to `save_to_disk` if the latter is not empty
-    if data_args.training_only and data_args.preprocessed_dataset_hub_path:
-        logger.info(f"Loading preprocessed dataset from Hub: {data_args.preprocessed_dataset_hub_path}")
-        vectorized_datasets = load_dataset(data_args.preprocessed_dataset_hub_path)
+    if data_args.precomputed_dataset:
+        # Try to load the dataset from Hugging Face Hub
+        try:
+            print(f"Fetching dataset from Hugging Face Hub: {data_args.precomputed_dataset}")
+            vectorized_datasets = load_dataset(
+                data_args.precomputed_dataset,
+                use_auth_token=data_args.use_auth_token,
+            )
+            dataset_was_precomputed = True
+        except Exception as e:
+            print(f"Error loading dataset from Hugging Face Hub: {e}")
+            print("Proceeding with dataset processing.")
+            dataset_was_precomputed = False
+    elif data_args.temporary_save_to_disk and os.path.exists(os.path.join(data_args.temporary_save_to_disk, 'dataset_info.json')):
+        # If not loading from HF Hub, check if there's a locally saved dataset
+        print(f"Loading pre-computed dataset from {data_args.temporary_save_to_disk}")
+        vectorized_datasets = datasets.load_from_disk(data_args.temporary_save_to_disk)
+        dataset_was_precomputed = True
     else:
+        dataset_was_precomputed = False
+
+    if not dataset_was_precomputed:
         raw_datasets = DatasetDict()
 
         columns_to_keep = {
@@ -320,8 +372,8 @@ def main():
 
     # derive max & min input length for sample rate & max duration
     sampling_rate = feature_extractor.sampling_rate
-    max_target_length = data_args.max_duration_in_seconds * sampling_rate
-    min_target_length = data_args.min_duration_in_seconds * sampling_rate
+    max_target_length = int(data_args.max_duration_in_seconds * sampling_rate)
+    min_target_length = int(data_args.min_duration_in_seconds * sampling_rate)
     target_audio_column_name = data_args.target_audio_column_name
     description_column_name = data_args.description_column_name
     prompt_column_name = data_args.prompt_column_name
@@ -344,7 +396,7 @@ def main():
     print("gathered_tensor", gathered_tensor)
     accelerator.wait_for_everyone()
 
-    if not data_args.training_only:
+    if not dataset_was_precomputed:
         # Filter on text length
         if description_column_name is not None and data_args.max_text_length is not None:
             with accelerator.local_main_process_first():
@@ -559,18 +611,18 @@ def main():
                     input_columns=["prompt_input_ids"],
                 )
 
-    if data_args.save_to_disk is not None and not data_args.training_only:
+    if data_args.save_to_disk is not None and not dataset_was_precomputed:
         if accelerator.is_main_process:
             vectorized_datasets.save_to_disk(
                 data_args.save_to_disk,
-                num_proc=min(data_args.preprocessing_num_workers, len(vectorized_datasets["eval"]) - 1),
+                num_proc=min(data_args.preprocessing_num_workers, len(get_evaluation_split(vectorized_datasets)) - 1),
             )
+            if data_args.precomputed_dataset:
+                print(f"Pushing processed dataset to Hugging Face Hub: {data_args.precomputed_dataset}")
+                vectorized_datasets.push_to_hub(data_args.precomputed_dataset, data_args.use_auth_token)
+
         accelerator.wait_for_everyone()
         logger.info(f"Dataset saved at {data_args.save_to_disk}")
-
-    if data_args.preprocessed_dataset_hub_path and accelerator.is_main_process and not data_args.training_only:
-        logger.info(f"Pushing processed dataset to Hub: {data_args.preprocessed_dataset_hub_path}")
-        vectorized_datasets.push_to_hub(data_args.preprocessed_dataset_hub_path)
 
     audio_max_length = None
     if padding == "max_length":
@@ -764,7 +816,10 @@ def main():
             if repo_name is None:
                 repo_name = Path(training_args.output_dir).absolute().name
             repo_id = api.create_repo(repo_name, exist_ok=True).repo_id
-
+            os.makedirs(training_args.output_dir, exist_ok=True)
+            with open(os.path.join(training_args.output_dir, ".gitignore"), "w+") as gitignore:
+                if "wandb" not in gitignore:
+                    gitignore.write("wandb\n")
         elif training_args.output_dir is not None:
             os.makedirs(training_args.output_dir, exist_ok=True)
     accelerator.wait_for_everyone()
@@ -1028,7 +1083,7 @@ def main():
                     batch = release_memory(batch)
 
                     validation_dataloader = DataLoader(
-                        vectorized_datasets["eval"],
+                        get_evaluation_split(vectorized_datasets),
                         collate_fn=data_collator,
                         batch_size=per_device_eval_batch_size,
                         drop_last=False,
@@ -1046,11 +1101,12 @@ def main():
                         # Model forward
                         eval_metric = eval_step(batch, accelerator, autocast_kwargs)
                         eval_metric = accelerator.gather_for_metrics(eval_metric)
+                        eval_metric = {key: val.unsqueeze(0) if val.ndim == 0 else val for (key,val) in eval_metric.items()}
                         eval_metrics.append(eval_metric)
 
                     if training_args.predict_with_generate:
                         validation_dataloader = DataLoader(
-                            vectorized_datasets["eval"],
+                            get_evaluation_split(vectorized_datasets),
                             collate_fn=data_collator,
                             batch_size=per_device_eval_batch_size,
                             drop_last=False,
@@ -1105,6 +1161,18 @@ def main():
                             )
                             eval_metrics.update(metric_values)
                             metrics_desc = " ".join([f"Eval {key}: {value} |" for key, value in metric_values.items()])
+                            if "wandb" in training_args.report_to:
+                                log_pred(
+                                    accelerator,
+                                    pred_descriptions,
+                                    pred_prompts,
+                                    transcriptions,
+                                    audios,
+                                    si_sdr_measures,
+                                    sampling_rate=sampling_rate,
+                                    step=cur_step,
+                                    prefix="eval",
+                                )
                         accelerator.wait_for_everyone()
 
                     # Print metrics and update progress bar
@@ -1144,7 +1212,31 @@ def main():
         if not continue_training:
             break
 
+    if data_args.gcs_bucket and data_args.gcp_token:
+        final_checkpoint_path = f"checkpoints/final-checkpoint-{cur_step}"
+        upload_checkpoint_to_gcs(data_args.gcs_bucket, final_checkpoint_path, training_args.output_dir, data_args.gcp_token)
+
     accelerator.end_training()
+
+def get_evaluation_split(datasets):
+    """
+    Retrieve the evaluation split from the datasets dictionary.
+    Prioritizes 'eval', then 'test', and creates a default if neither exists.
+    """
+    if "eval" in datasets:
+        return datasets["eval"]
+    elif "test" in datasets:
+        return datasets["test"]
+    elif "train" in datasets:
+        # If neither eval nor test exists, create a small evaluation set from train
+        train_dataset = datasets["train"]
+        eval_size = min(len(train_dataset) // 10, 1000)  # 10% or 1000 samples, whichever is smaller
+        train_dataset, eval_dataset = train_dataset.train_test_split(test_size=eval_size, shuffle=True, seed=42).values()
+        datasets["train"] = train_dataset
+        datasets["eval"] = eval_dataset
+        return eval_dataset
+    else:
+        raise ValueError("No 'eval', 'test', or 'train' split found in the dataset.")
 
 
 if __name__ == "__main__":
