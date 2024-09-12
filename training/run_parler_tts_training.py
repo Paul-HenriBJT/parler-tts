@@ -87,9 +87,12 @@ def main():
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
     send_example_telemetry("run_parler_tts", model_args, data_args)
 
-    if data_args.gcs_bucket and data_args.gcs_checkpoint_path and data_args.gcp_token:
-        fetch_checkpoint_from_gcs(data_args.gcs_bucket, data_args.gcs_checkpoint_path, training_args.output_dir, data_args.gcp_token)
+    if data_args.gcp_token and not os.path.isfile(data_args.gcp_token):
+        raise ValueError(f"The specified GCP key file does not exist: {data_args.gcp_token}")
 
+    # Use the key file for GCS operations
+    if data_args.gcs_bucket and data_args.gcs_checkpoint_path:
+        fetch_checkpoint_from_gcs(data_args.gcs_bucket, data_args.gcs_checkpoint_path, training_args.output_dir, data_args.gcp_token)
 
     if data_args.wandb_api_key:
         import wandb
@@ -1190,7 +1193,7 @@ def main():
         if not continue_training:
             break
 
-    if data_args.upload_final_checkpoint and data_args.gcs_bucket and data_args.gcp_token:
+    if data_args.upload_final_checkpoint and data_args.gcs_bucket:
         final_checkpoint_path = f"checkpoints/final-checkpoint-{cur_step}"
         upload_checkpoint_to_gcs(data_args.gcs_bucket, final_checkpoint_path, training_args.output_dir, data_args.gcp_token)
 

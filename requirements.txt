@@ -1,3 +1,3 @@
-git+https://github.com/Paul-HenriBJT/parler-tts.git@runpod
+git+https://github.com/Paul-HenriBJT/loqui.git@checkpoint-flexai
 google-auth
 google-api-python-client
