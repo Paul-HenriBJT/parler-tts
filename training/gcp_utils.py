@@ -1,6 +1,7 @@
 from google.cloud import storage
 from google.oauth2 import service_account
 import os
+from pathlib import Path
 
 def get_storage_client(key_file_path):
     """
@@ -54,24 +55,20 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
         key_file_path (str): Path to the service account JSON key file.
     """
     print(f"Using key file: {key_file_path}")
-    client = get_storage_client(key_file_path)
-    bucket = client.bucket(bucket_name)
+    storage_client = storage.Client.from_service_account_json(key_file_path)
+    bucket = storage_client.get_bucket(bucket_name=bucket_name)
     blobs = bucket.list_blobs(prefix=checkpoint_path)
 
     for blob in blobs:
-        # Skip if the blob is a directory
-        if blob.name.endswith('/'):
+        if blob.name.endswith("/"):
             continue
         
-        # Preserve the directory structure
-        relative_path = os.path.relpath(blob.name, checkpoint_path)
-        local_file_path = os.path.join(output_dir, relative_path)
+        file_split = blob.name.split("/")
+        directory = os.path.join(output_dir, "/".join(file_split[:-1]))
+        Path(directory).mkdir(parents=True, exist_ok=True)
         
-        # Create directories if they don't exist
-        os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
-        
-        # Download the file
+        local_file_path = os.path.join(output_dir, blob.name)
         blob.download_to_filename(local_file_path)
         print(f"Downloaded: {local_file_path}")
-        
+    
     print(f"Checkpoint downloaded to {output_dir}")
