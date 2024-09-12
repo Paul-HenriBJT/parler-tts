@@ -42,6 +42,8 @@ def upload_checkpoint_to_gcs(bucket_name, checkpoint_path, local_dir, key_file_p
     
     print(f"Checkpoint uploaded to gs://{bucket_name}/{checkpoint_path}")
 
+import os
+
 def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file_path):
     """
     Fetches a specified checkpoint from a Google Cloud Storage bucket and saves it in a subfolder
@@ -56,30 +58,44 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
     print(f"Using key file: {key_file_path}")
     client = get_storage_client(key_file_path)
     bucket = client.bucket(bucket_name)
+    print(f"Fetching blobs from bucket '{bucket_name}' with prefix '{checkpoint_path}'")
     blobs = bucket.list_blobs(prefix=checkpoint_path)
 
     # Extract the last part of the checkpoint path to use as the subfolder name
     subfolder_name = checkpoint_path.strip('/').split('/')[-1]  # Ensure no trailing slashes
     checkpoint_output_dir = os.path.join(output_dir, subfolder_name)
+    print(f"Subfolder for the checkpoint: {subfolder_name}")
+    print(f"Checkpoint will be saved in: {checkpoint_output_dir}")
 
     # Ensure the checkpoint output directory exists
     os.makedirs(checkpoint_output_dir, exist_ok=True)
+    print(f"Created checkpoint output directory: {checkpoint_output_dir}")
 
     for blob in blobs:
+        # Print blob name for debugging
+        print(f"Processing blob: {blob.name}")
+        
         # Skip the directory itself
         if blob.name.endswith('/'):
+            print(f"Skipping directory blob: {blob.name}")
             continue
         
         # Calculate the relative path from the checkpoint's root, but place it under the last part
         relative_path = os.path.relpath(blob.name, checkpoint_path)
+        print(f"Relative path for the file: {relative_path}")
         
         # Set the local file path, ensuring it's within the checkpoint subfolder
         local_file_path = os.path.join(checkpoint_output_dir, relative_path)
+        print(f"Local file path: {local_file_path}")
         
         # Ensure the directory for this file exists
-        os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+        local_dir = os.path.dirname(local_file_path)
+        if not os.path.exists(local_dir):
+            print(f"Creating directory: {local_dir}")
+        os.makedirs(local_dir, exist_ok=True)
         
         # Download the file
+        print(f"Downloading blob to: {local_file_path}")
         blob.download_to_filename(local_file_path)
         print(f"Downloaded: {local_file_path}")
 
