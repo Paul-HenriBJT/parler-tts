@@ -36,7 +36,6 @@ def fetch_checkpoint_from_huggingface(repo_id, checkpoint_path, output_dir, toke
                 repo_id=repo_id,
                 filename=file,
                 local_dir=output_dir,
-                local_dir_use_symlinks=False,
                 token=token
             )
             print(f"Downloaded: {local_path}")
