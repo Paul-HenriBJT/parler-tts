@@ -78,25 +78,8 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
             print(f"Skipping directory blob: {blob.name}")
             continue
         
-        # Calculate the relative path from the checkpoint's root, but place it under the last part
-        relative_path = os.path.relpath(blob.name, checkpoint_path)
-
-        # If the relative path is '.', it means the file is at the root of checkpoint_path
-        if relative_path == '.':
-            relative_path = os.path.basename(blob.name)
-            print(f"Root-level file detected: {relative_path}")
-        
-        # Set the local file path, ensuring it's within the checkpoint subfolder
-        local_file_path = os.path.join(checkpoint_output_dir, relative_path)
-        print(f"Local file path: {local_file_path}")
-        
-        # Ensure the directory for this file exists
-        local_dir = os.path.dirname(local_file_path)
-        if not os.path.exists(local_dir):
-            print(f"Creating directory: {local_dir}")
-        os.makedirs(local_dir, exist_ok=True)
-        
-        # Download the file
+        # Always download the file directly to the created subfolder
+        local_file_path = os.path.join(checkpoint_output_dir, os.path.basename(blob.name))
         print(f"Downloading blob to: {local_file_path}")
         blob.download_to_filename(local_file_path)
         print(f"Downloaded: {local_file_path}")
