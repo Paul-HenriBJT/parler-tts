@@ -87,9 +87,9 @@ def main():
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
     send_example_telemetry("run_parler_tts", model_args, data_args)
 
-    if data_args.gcs_bucket and data_args.gcs_checkpoint_path and data_args.gcp_token:
-        print(f"Fetching checkpoint from {data_args.gcs_checkpoint_path} with token {data_args.gcp_token}")
-        fetch_checkpoint_from_huggingface(data_args.checkpoint_repo_id, data_args.checkpoint_path, training_args.output_dir, data_args.gcp_token)
+    if data_args.checkpoint_repo_id and data_args.checkpoint_path and training_args.hub_token:
+        print(f"Fetching checkpoint from {data_args.checkpoint_repo_id} with token {training_args.hub_token}")
+        fetch_checkpoint_from_huggingface(data_args.checkpoint_repo_id, data_args.checkpoint_path, training_args.output_dir, training_args.hub_token)
 
 
     if data_args.wandb_api_key:
