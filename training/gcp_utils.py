@@ -70,14 +70,27 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
         if blob.name.endswith('/'):
             continue
         
-        # Get the filename without the full path
-        filename = os.path.basename(blob.name)
+        # Get the relative path within the checkpoint
+        relative_path = os.path.relpath(blob.name, checkpoint_path)
         
-        # Set the local file path
-        local_file_path = os.path.join(checkpoint_output_dir, filename)
+        # Set the local file path, ensuring it's within the checkpoint subfolder
+        local_file_path = os.path.join(checkpoint_output_dir, relative_path)
+        
+        # Ensure the directory for this file exists
+        os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
         
         # Download the file
         blob.download_to_filename(local_file_path)
         print(f"Downloaded: {local_file_path}")
 
     print(f"Checkpoint downloaded to {checkpoint_output_dir}")
+    
+    # List contents of the directory to verify
+    print("Contents of the checkpoint directory:")
+    for root, dirs, files in os.walk(checkpoint_output_dir):
+        level = root.replace(checkpoint_output_dir, '').count(os.sep)
+        indent = ' ' * 4 * level
+        print(f"{indent}{os.path.basename(root)}/")
+        sub_indent = ' ' * 4 * (level + 1)
+        for f in files:
+            print(f"{sub_indent}{f}")
