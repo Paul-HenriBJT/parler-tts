@@ -44,7 +44,8 @@ def upload_checkpoint_to_gcs(bucket_name, checkpoint_path, local_dir, key_file_p
 
 def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file_path):
     """
-    Fetches a specified checkpoint from a Google Cloud Storage bucket and adds it to the output_dir folder.
+    Fetches a specified checkpoint from a Google Cloud Storage bucket and adds it to the output_dir folder,
+    preserving the original folder structure.
     
     Args:
         bucket_name (str): Name of the GCS bucket.
@@ -52,15 +53,25 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
         output_dir (str): Local directory to save the checkpoint.
         key_file_path (str): Path to the service account JSON key file.
     """
-    print(key_file_path)
+    print(f"Using key file: {key_file_path}")
     client = get_storage_client(key_file_path)
     bucket = client.bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=checkpoint_path)
 
     for blob in blobs:
+        # Skip if the blob is a directory
+        if blob.name.endswith('/'):
+            continue
+        
+        # Preserve the directory structure
         relative_path = os.path.relpath(blob.name, checkpoint_path)
         local_file_path = os.path.join(output_dir, relative_path)
+        
+        # Create directories if they don't exist
         os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+        
+        # Download the file
         blob.download_to_filename(local_file_path)
+        print(f"Downloaded: {local_file_path}")
         
     print(f"Checkpoint downloaded to {output_dir}")
