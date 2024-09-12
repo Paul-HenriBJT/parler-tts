@@ -339,6 +339,10 @@ class DataTrainingArguments:
         default=None,
         metadata={"help": "Name of the folder of the checkpoint in the repo."},
     )
+    precomputed_dataset: Optional[str] = field(
+        default=None,
+        metadata={"help": "The name of the dataset to load from Hugging Face Hub."},
+    )
     
 
 @dataclass
