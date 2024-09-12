@@ -343,10 +343,6 @@ class DataTrainingArguments:
         default=None,
         metadata={"help": "The name of the dataset to load from Hugging Face Hub."},
     )
-    hub_token: Optional[str] = field(
-        default=None,
-        metadata={"help": "Hugging Face Hub API token."},
-    )
     
 
 @dataclass
