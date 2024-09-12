@@ -331,18 +331,13 @@ class DataTrainingArguments:
         default=None,
         metadata={"help": "Google Cloud Storage bucket to fetch and write checkpoints files."},
     )
-    gcs_checkpoint_path: Optional[str] = field(
+    checkpoint_repo_id: Optional[str] = field(
         default=None,
-        metadata={"help": "Path to the checkpoint in the GCS bucket."
-                  "If specified will fetch the checkpoint from the GCS bucket and load it."},
+        metadata={"help": "Id of the repo where the checkpoint is stored on Hugging Face Hub."},
     )
-    gcp_token: Optional[str] = field(
+    checkpoint_path: Optional[str] = field(
         default=None,
-        metadata={"help": "Path to the GCP service account JSON key file for authentication."}
-    )
-    precomputed_dataset: Optional[str] = field(
-        default=None,
-        metadata={"help": "The name of the dataset to load from Hugging Face Hub."},
+        metadata={"help": "Name of the folder of the checkpoint in the repo."},
     )
     
 

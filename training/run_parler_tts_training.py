@@ -52,7 +52,7 @@ from parler_tts import (
     build_delay_pattern_mask,
 )
 
-from training.gcp_utils import fetch_checkpoint_from_gcs, upload_checkpoint_to_gcs
+from training.hf_utils import fetch_checkpoint_from_huggingface
 
 from training.utils import (
     log_pred,
@@ -89,7 +89,7 @@ def main():
 
     if data_args.gcs_bucket and data_args.gcs_checkpoint_path and data_args.gcp_token:
         print(f"Fetching checkpoint from {data_args.gcs_checkpoint_path} with token {data_args.gcp_token}")
-        fetch_checkpoint_from_gcs(data_args.gcs_bucket, data_args.gcs_checkpoint_path, training_args.output_dir, data_args.gcp_token)
+        fetch_checkpoint_from_huggingface(data_args.checkpoint_repo_id, data_args.checkpoint_path, training_args.output_dir, data_args.gcp_token)
 
 
     if data_args.wandb_api_key:
@@ -1211,10 +1211,6 @@ def main():
 
         if not continue_training:
             break
-
-    if data_args.gcs_bucket and data_args.gcp_token:
-        final_checkpoint_path = f"checkpoints/final-checkpoint-{cur_step}"
-        upload_checkpoint_to_gcs(data_args.gcs_bucket, final_checkpoint_path, training_args.output_dir, data_args.gcp_token)
 
     accelerator.end_training()
 
