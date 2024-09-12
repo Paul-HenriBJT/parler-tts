@@ -59,7 +59,7 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
     blobs = bucket.list_blobs(prefix=checkpoint_path)
 
     # Extract the last part of the checkpoint path to use as the subfolder name
-    subfolder_name = checkpoint_path.split('/')[-1]
+    subfolder_name = checkpoint_path.strip('/').split('/')[-1]  # Ensure no trailing slashes
     checkpoint_output_dir = os.path.join(output_dir, subfolder_name)
 
     # Ensure the checkpoint output directory exists
@@ -70,7 +70,7 @@ def fetch_checkpoint_from_gcs(bucket_name, checkpoint_path, output_dir, key_file
         if blob.name.endswith('/'):
             continue
         
-        # Get the relative path within the checkpoint
+        # Calculate the relative path from the checkpoint's root, but place it under the last part
         relative_path = os.path.relpath(blob.name, checkpoint_path)
         
         # Set the local file path, ensuring it's within the checkpoint subfolder
