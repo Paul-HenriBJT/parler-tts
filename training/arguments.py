@@ -94,10 +94,6 @@ class ModelArguments:
             "help": "Prompt tokenizer padding side. Defaults to `left`. If the prompt is pre-pended to the codebooks hidden states, it should be padded on the left."
         },
     )
-    ddp_find_unused_parameters: bool = field(
-    default=False,
-    metadata={"help": "Whether to find unused parameters in DistributedDataParallel."}
-    )
 
 @dataclass
 class DataTrainingArguments:

@@ -115,7 +115,7 @@ def main():
         log_with=training_args.report_to,
         project_dir=training_args.output_dir,
         kwargs_handlers=kwargs_handlers,
-        ddp_kwargs={"find_unused_parameters": training_args.ddp_find_unused_parameters}
+        ddp_kwargs={"find_unused_parameters": True}
     )
 
     accelerator.init_trackers(
