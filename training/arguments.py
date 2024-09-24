@@ -94,6 +94,14 @@ class ModelArguments:
             "help": "Prompt tokenizer padding side. Defaults to `left`. If the prompt is pre-pended to the codebooks hidden states, it should be padded on the left."
         },
     )
+    google_drive_token: str = field(
+        default=None,
+        metadata={"help": "Access token for Google Drive"},
+    )
+    load_checkpoint: str = field(
+        default=None,
+        metadata={"help": "Path to checkpoint to load."},
+    )
 
 @dataclass
 class DataTrainingArguments:
@@ -104,7 +112,12 @@ class DataTrainingArguments:
     into argparse arguments to be able to specify them on
     the command line.
     """
-
+    wandb_api_key: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "Weights & Biases API key. If provided, it will be used to log in to wandb."
+        },
+    )
     train_dataset_name: str = field(
         default=None,
         metadata={
@@ -120,6 +133,7 @@ class DataTrainingArguments:
             "multiple datasets by separating dataset configs by a '+' symbol."
         },
     )
+    id_column_name: str = field(default=None, metadata={"help": "id column name."})
     train_split_name: str = field(
         default="train",
         metadata={
@@ -313,7 +327,22 @@ class DataTrainingArguments:
         default=2,
         metadata={"help": ("Pad to multiple of for tokenizers.")},
     )
-
+    gcs_bucket: Optional[str] = field(
+        default=None,
+        metadata={"help": "Google Cloud Storage bucket to fetch and write checkpoints files."},
+    )
+    checkpoint_repo_id: Optional[str] = field(
+        default=None,
+        metadata={"help": "Id of the repo where the checkpoint is stored on Hugging Face Hub."},
+    )
+    checkpoint_path: Optional[str] = field(
+        default=None,
+        metadata={"help": "Name of the folder of the checkpoint in the repo."},
+    )
+    precomputed_dataset: Optional[str] = field(
+        default=None,
+        metadata={"help": "The name of the dataset to load from Hugging Face Hub."},
+    )
 
 @dataclass
 class ParlerTTSTrainingArguments(Seq2SeqTrainingArguments):
