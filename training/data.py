@@ -6,7 +6,7 @@ import datasets
 import numpy as np
 import torch
 from accelerate import Accelerator
-from datasets import Dataset, IterableDataset, concatenate_datasets, interleave_datasets, load_dataset, get_dataset_config_names
+from datasets import Dataset, IterableDataset, concatenate_datasets, interleave_datasets, load_dataset
 from tqdm import tqdm
 from transformers import AutoFeatureExtractor, AutoTokenizer
 
@@ -205,30 +205,13 @@ def load_multiple_datasets(
     # iterate over the datasets we want to interleave
     for dataset_dict in tqdm(dataset_names_dict, desc="Combining datasets..."):
         with accelerator.local_main_process_first():
-            if dataset_dict["config"] == "all":
-                # Get all available configurations
-                configs = get_dataset_config_names(dataset_dict["name"])
-                datasets_for_name = []
-                for config in configs:
-                    dataset = load_dataset(
-                        dataset_dict["name"],
-                        config,
-                        split=dataset_dict["split"],
-                        streaming=streaming,
-                        **kwargs,
-                    )
-                    datasets_for_name.append(dataset)
-                dataset = concatenate_datasets(datasets_for_name)
-            else:
-                # Load single configuration as before
-                dataset = load_dataset(
-                    dataset_dict["name"],
-                    dataset_dict["config"],
-                    split=dataset_dict["split"],
-                    streaming=streaming,
-                    **kwargs,
-                )
-            
+            dataset = load_dataset(
+                dataset_dict["name"],
+                dataset_dict["config"],
+                split=dataset_dict["split"],
+                streaming=streaming,
+                **kwargs,
+            )
             dataset_features = dataset.features.keys()
 
             if sampling_rate is not None and audio_column_name is not None:
@@ -247,6 +230,15 @@ def load_multiple_datasets(
                     streaming=streaming,
                     **kwargs,
                 )
+
+                # TODO(YL): I forgot to create unique ids for MLS english.
+                # To iterate faster, I bypass the original id check and do another one. - Done once because assuming it won't change next time
+                # if dataset_dict["name"] == "parler-tts/mls_eng_10k":
+                #     def concat_ids(book_id, speaker_id, begin_time):
+                #         return {"id": f"{book_id}_{speaker_id}_{str(begin_time).replace('.', '_')}"}
+                #     dataset = dataset.map(concat_ids, input_columns=["book_id", "speaker_id", "begin_time"], num_proc=24)
+                #     metadata_dataset = metadata_dataset.map(concat_ids, input_columns=["book_id", "speaker_id", "begin_time"], num_proc=24)
+                #     metadata_dataset = metadata_dataset.rename_column(id_column_name, f"metadata_{id_column_name}")
 
                 if dataset_dict["name"] not in {"parler-tts/mls_eng_10k", "parler-tts/mls_eng"}:
                     if id_column_name is not None and id_column_name not in dataset.column_names:
@@ -298,7 +290,7 @@ def load_multiple_datasets(
                 dataset_features = dataset.features.keys()
 
             if columns_to_keep is not None:
-                dataset = dataset.remove_columns(set(dataset_features) - set(columns_to_keep))
+                dataset = dataset.remove_columns(set(dataset_features - columns_to_keep))
         all_datasets.append(dataset)
 
     if len(all_datasets) == 1:
