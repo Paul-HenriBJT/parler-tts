@@ -206,7 +206,7 @@ def load_multiple_datasets(
     for dataset_dict in tqdm(dataset_names_dict, desc="Combining datasets..."):
         with accelerator.local_main_process_first():
             dataset = load_from_disk(
-                dataset_dict["name"],
+                f"{dataset_dict["name"]}/{dataset_dict["config"]}",
             )[dataset_dict["split"]]
             dataset_features = dataset.features.keys()
 
@@ -220,7 +220,7 @@ def load_multiple_datasets(
                     f'Merging {dataset_dict["name"]} - {dataset_dict["split"]} with {metadata_dataset_name} - {dataset_dict["split"]}'
                 )
                 metadata_dataset = load_from_disk(
-                    metadata_dataset_name
+                    f"{metadata_dataset_name}/{dataset_dict['config']}",
                 )[dataset_dict["split"]]
 
                 # TODO(YL): I forgot to create unique ids for MLS english.
