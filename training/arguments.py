@@ -343,7 +343,10 @@ class DataTrainingArguments:
         default=None,
         metadata={"help": "The name of the dataset to load from Hugging Face Hub."},
     )
-    
+    load_precomputed_dataset_from_hub = field(
+        default=False,
+        metadata={"help": "Whether to load the precomputed dataset from the Hub."},
+    )
 
 @dataclass
 class ParlerTTSTrainingArguments(Seq2SeqTrainingArguments):
