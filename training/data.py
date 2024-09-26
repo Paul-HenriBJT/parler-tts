@@ -207,11 +207,7 @@ def load_multiple_datasets(
         with accelerator.local_main_process_first():
             dataset = load_from_disk(
                 dataset_dict["name"],
-                dataset_dict["config"],
-                split=dataset_dict["split"],
-                streaming=streaming,
-                **kwargs,
-            )
+            )[dataset_dict["split"]]
             dataset_features = dataset.features.keys()
 
             if sampling_rate is not None and audio_column_name is not None:
@@ -224,12 +220,8 @@ def load_multiple_datasets(
                     f'Merging {dataset_dict["name"]} - {dataset_dict["split"]} with {metadata_dataset_name} - {dataset_dict["split"]}'
                 )
                 metadata_dataset = load_from_disk(
-                    metadata_dataset_name,
-                    dataset_dict["config"],
-                    split=dataset_dict["split"],
-                    streaming=streaming,
-                    **kwargs,
-                )
+                    metadata_dataset_name
+                )[dataset_dict["split"]]
 
                 # TODO(YL): I forgot to create unique ids for MLS english.
                 # To iterate faster, I bypass the original id check and do another one. - Done once because assuming it won't change next time
